@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Investor List — Allegheny & Butler County</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -28,22 +28,89 @@ document.addEventListener('DOMContentLoaded', function() {
     --red:#dc2626; --blue:#1d4ed8; --text:#0f172a; --muted:#4b5a72;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
+  html { -webkit-text-size-adjust:100%; }
   body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
           font-size:14px; line-height:1.6; padding:40px 32px;
-          max-width:1280px; margin:0 auto; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start;
-             padding-bottom:24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
-  .eyebrow { font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
-              letter-spacing:.2em; color:#92650a; margin-bottom:6px; }
-  h1 { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:#0f172a; }
-  .sub { font-size:13px; color:var(--muted); margin-top:6px; }
-  .date { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); }
-  .live-badge { display:inline-flex; align-items:center; gap:6px; background:#dcfce7;
-                 border:1px solid var(--green-dim); color:var(--green);
-                 font-family:'Space Mono',monospace; font-size:10px;
-                 padding:4px 10px; border-radius:2px; margin-top:6px; }
-  .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%;
-               animation:pulse 1.5s ease infinite; }
+          max-width:1280px; margin:0 auto; overflow-x:hidden;
+          -webkit-overflow-scrolling:touch; }
+  img { max-width:100%; height:auto; display:block; }
+  /* ── ASK FRONK BRANDED HEADER ──────────────────────────────────────────── */
+  .header {
+    background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 60%, #091525 100%);
+    border-radius: 8px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #1e3a5f;
+    box-shadow: 0 4px 24px rgba(0,150,255,0.08);
+    gap: 16px;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1;
+  }
+  .header-logo {
+    height: 72px;
+    max-height: 72px;
+    width: auto;
+    max-width: 160px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+  .header-text { flex: 1; }
+  .eyebrow {
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.25em;
+    color:#38bdf8;
+    margin-bottom:4px;
+  }
+  h1 {
+    font-family:'Syne',sans-serif;
+    font-size:30px;
+    font-weight:800;
+    color:#ffffff;
+    line-height:1.1;
+    letter-spacing:-0.01em;
+  }
+  h1 span.cyan { color:#38bdf8; }
+  .tagline {
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    color:#64748b;
+    margin-top:5px;
+  }
+  .tagline span { color:#38bdf8; margin:0 4px; }
+  .sub { font-size:12px; color:#94a3b8; margin-top:4px; }
+  .header-right { text-align:right; flex-shrink:0; }
+  .date {
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:#94a3b8;
+    margin-bottom:6px;
+  }
+  .live-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(34,197,94,0.12);
+    border:1px solid rgba(34,197,94,0.35);
+    color:#4ade80;
+    font-family:'Space Mono',monospace; font-size:9px;
+    padding:4px 10px; border-radius:2px;
+  }
+  .live-dot {
+    width:6px; height:6px;
+    background:#4ade80;
+    border-radius:50%;
+    animation:pulse 1.5s ease infinite;
+  }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
   .stats-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:1px;
@@ -161,31 +228,101 @@ document.addEventListener('DOMContentLoaded', function() {
              font-family:'Space Mono',monospace; font-size:9px; color:#94a3b8;
              line-height:1.8; text-transform:uppercase; letter-spacing:.05em; }
 
-  /* ── MOBILE RESPONSIVE ─────────────────────────────────────────────────── */
+  /* ══════════════════════════════════════════════════════════
+     MOBILE RESPONSIVE  ≤ 768px
+     ══════════════════════════════════════════════════════════ */
   @media (max-width: 768px) {
-    body { padding:16px 12px; font-size:13px; }
 
-    /* Header stacks vertically */
-    .header { flex-direction:column; gap:10px; }
-    h1 { font-size:26px; }
+    /* ── Base layout ── */
+    body { padding:12px 10px; font-size:13px; overflow-x:hidden; }
 
-    /* Stats: 2-column grid */
-    .stats-strip { grid-template-columns:repeat(2,1fr); }
+    /* ── Header ── */
+    .header {
+      flex-direction:column;
+      align-items:flex-start;
+      padding:14px;
+      gap:10px;
+    }
+    .header-brand { gap:12px; }
+    .header-logo { height:48px; }
+    h1 { font-size:20px; }
+    .eyebrow { font-size:8px; letter-spacing:.15em; }
+    .tagline { font-size:8px; }
+    .sub { font-size:11px; }
+    .header-right { text-align:left; width:100%; }
+    .date { font-size:10px; }
+
+    /* ── Stats strip: 2 col ── */
+    .stats-strip {
+      grid-template-columns:repeat(2,1fr);
+    }
     .stats-strip .stat:last-child { grid-column:1/-1; }
+    .stat-num { font-size:18px; }
+    .stat-label { font-size:8px; }
 
-    /* Section header wraps */
-    .section-hdr { flex-wrap:wrap; gap:8px; }
+    /* ── Section headers ── */
+    .section-hdr { flex-wrap:wrap; gap:6px; margin:20px 0 12px; }
     .section-line { display:none; }
+    .county-pill { font-size:8px; padding:3px 10px; }
 
-    /* Hide desktop table, show mobile cards instead */
-    .deal-table { display:none; }
+    /* ── Hide desktop table entirely ── */
+    .deal-table { display:none !important; }
+
+    /* ── Show mobile cards ── */
     .mobile-cards { display:block !important; }
 
-    /* Quick ref stacks */
-    .quick-ref { grid-template-columns:1fr; }
+    /* ── Deal cards ── */
+    .deal-card { padding:12px 10px; margin-bottom:10px; }
+    .deal-card-address { font-size:13px; }
+    .deal-card-location { font-size:10px; }
+    .deal-card-score { font-size:18px; }
+    .deal-card-grid {
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+    }
+    .deal-card-label { font-size:8px; }
+    .deal-card-value { font-size:13px; }
+    .deal-card-breakdown {
+      font-size:8px;
+      line-height:1.7;
+      word-break:break-word;
+    }
 
-    /* Legend wraps */
-    .legend { flex-direction:column; gap:6px; }
+    /* ── Photo links ── */
+    .photo-links { gap:4px; margin-top:5px; flex-wrap:wrap; }
+    .photo-link { font-size:8px; padding:3px 7px; }
+
+    /* ── Tags ── */
+    .tag { font-size:8px; padding:2px 5px; margin-right:3px; margin-bottom:3px; }
+
+    /* ── Legend ── */
+    .legend {
+      flex-direction:column;
+      gap:5px;
+      padding:10px 12px;
+      font-size:10px;
+    }
+
+    /* ── Tips ── */
+    .tips { padding:14px; }
+    .tips ul li { font-size:11px; }
+
+    /* ── Quick ref ── */
+    .quick-ref { grid-template-columns:1fr; gap:8px; }
+    .ref-box { padding:12px; }
+    .ref-box p, .ref-box a { font-size:11px; }
+
+    /* ── Footer ── */
+    .footer { font-size:8px; line-height:1.9; }
+  }
+
+  /* ── Extra small phones ≤ 380px ── */
+  @media (max-width: 380px) {
+    body { padding:10px 8px; }
+    .header-logo { height:40px; }
+    h1 { font-size:18px; }
+    .deal-card-grid { grid-template-columns:1fr; }
+    .stats-strip { grid-template-columns:1fr 1fr; }
   }
 
   /* Mobile deal cards — hidden on desktop, shown on mobile */
@@ -273,14 +410,18 @@ document.addEventListener('DOMContentLoaded', function() {
 <body>
 
 <div class="header">
-  <div>
-    <div class="eyebrow">Western PA Real Estate · Investor Intelligence</div>
-    <h1>Investor List</h1>
-    <div class="sub">Allegheny County &amp; Butler County, PA · <span id="hdr-date"></span></div>
+  <div class="header-brand">
+    <img class="header-logo" src="data:image/jpeg;base64,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" alt="Ask Fronk Logo" />
+    <div class="header-text">
+      <div class="eyebrow">Western PA Real Estate · Investor Intelligence</div>
+      <h1>Investor Report</h1>
+      <div class="tagline">Analyze<span>·</span>Invest<span>·</span>Profit</div>
+      <div class="sub">Allegheny County &amp; Butler County, PA · <span id="hdr-date"></span></div>
+    </div>
   </div>
-  <div style="text-align:right;">
+  <div class="header-right">
     <div class="date">Last viewed: <span id="live-ts"></span></div>
-    <div class="live-badge"><span class="live-dot"></span> Report deployed: Apr 19, 2026</div>
+    <div class="live-badge"><span class="live-dot"></span> Deployed: Apr 19, 2026</div>
   </div>
 </div>
 
