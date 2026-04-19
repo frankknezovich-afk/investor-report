@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investor List — Allegheny & Butler County</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f4f6fa; --surface:#fff; --surface2:#eef1f7; --border:#d0d8e8;
+    --gold:#b8860b; --green:#16a34a; --green-dim:#15803d;
+    --red:#dc2626; --blue:#1d4ed8; --text:#0f172a; --muted:#4b5a72;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+          font-size:14px; line-height:1.6; padding:40px 32px;
+          max-width:1280px; margin:0 auto; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start;
+             padding-bottom:24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
+  .eyebrow { font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+              letter-spacing:.2em; color:#92650a; margin-bottom:6px; }
+  h1 { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:#0f172a; }
+  .sub { font-size:13px; color:var(--muted); margin-top:6px; }
+  .date { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); }
+  .live-badge { display:inline-flex; align-items:center; gap:6px; background:#dcfce7;
+                 border:1px solid var(--green-dim); color:var(--green);
+                 font-family:'Space Mono',monospace; font-size:10px;
+                 padding:4px 10px; border-radius:2px; margin-top:6px; }
+  .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%;
+               animation:pulse 1.5s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .stats-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:1px;
+                  background:var(--border); border:1px solid var(--border); margin-bottom:28px; }
+  .stat { background:var(--surface); padding:14px 16px; text-align:center; }
+  .stat-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:700;
+               color:#92650a; line-height:1; }
+  .stat-num.green { color:#15803d; }
+  .stat-num.blue  { color:#1d4ed8; }
+  .stat-label { font-family:'Space Mono',monospace; font-size:9px; text-transform:uppercase;
+                 letter-spacing:.1em; color:var(--muted); margin-top:4px; }
+
+  .section-hdr { display:flex; align-items:center; gap:14px; margin:28px 0 16px; }
+  .section-line { flex:1; height:1px; background:var(--border); }
+  .county-pill { font-family:'Space Mono',monospace; font-size:9px; text-transform:uppercase;
+                  letter-spacing:.12em; padding:4px 12px; border-radius:2px; }
+  .pill-a { background:#fef9e7; color:#92650a; border:1px solid #d4a017; }
+  .pill-b { background:#eff6ff; color:#1d4ed8; border:1px solid #93c5fd; }
+
+  .deal-table { width:100%; border-collapse:collapse; margin-bottom:8px; }
+  .deal-table thead tr { background:var(--surface2); }
+  .deal-table th { font-family:'Space Mono',monospace; font-size:9px; text-transform:uppercase;
+                    letter-spacing:.12em; color:var(--muted); padding:10px 12px;
+                    text-align:left; border-bottom:1px solid var(--border); font-weight:400; }
+  .deal-table td { padding:12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .deal-table tr:hover td { background:rgba(0,0,0,.02); }
+  .deal-table tr:last-child td { border-bottom:none; }
+
+  .address-cell strong { font-weight:600; font-size:13px; display:block; color:#0f172a; }
+  .address-cell span   { font-size:11px; color:var(--muted); }
+  .price     { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#92650a; white-space:nowrap; }
+  .est-value { font-size:11px; color:var(--muted); margin-top:2px; }
+  .rehab-cost { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#f97316; }
+  .rehab-note { font-size:10px; color:var(--muted); margin-top:2px; }
+  .profit-pos  { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#16a34a; }
+  .profit-neg  { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#dc2626; }
+  .profit-tbd  { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#1d4ed8; }
+  .profit-breakdown { font-family:'Space Mono',monospace; font-size:9px; color:#4b5a72;
+                       margin-top:3px; line-height:1.6; }
+  .profit-roi { display:inline-block; margin-top:4px; font-family:'Space Mono',monospace;
+                 font-size:9px; padding:2px 6px; border-radius:2px; }
+  .roi-hot  { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+  .roi-good { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+  .roi-low  { background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; }
+  .roi-tbd  { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+  .rent-estimate { font-family:'Space Mono',monospace; font-size:11px; color:#15803d; }
+
+  .score-bar  { display:flex; align-items:center; gap:8px; }
+  .score-num  { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; min-width:30px; }
+  .score-num.s-hot  { color:#15803d; }
+  .score-num.s-good { color:#92650a; }
+  .score-num.s-ok   { color:#64748b; }
+  .score-track { flex:1; height:4px; background:#e2e8f0; border-radius:2px; min-width:50px; }
+  .score-fill      { height:100%; border-radius:2px; background:#16a34a; }
+  .score-fill.gold { background:#d97706; }
+
+  .tag { display:inline-block; font-family:'Space Mono',monospace; font-size:9px;
+          text-transform:uppercase; letter-spacing:.08em; padding:2px 7px;
+          border-radius:2px; margin-right:4px; white-space:nowrap; }
+  .tag-hot      { background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; }
+  .tag-taxlien  { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+  .tag-multi    { background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe; }
+  .tag-rental   { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+  .tag-flip     { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+  .tag-strat    { background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; }
+  .tag-hottest  { background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; }
+  .tag-foreclosure { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+  .tag-off-market  { background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe; }
+  .tag-valueadd    { background:#fff7ed; color:#9a3412; border:1px solid #fdba74; }
+
+  /* ── PHOTO LINKS ────────────────────────────────────────────────────────── */
+  .photo-links { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+  .photo-link {
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding:2px 8px;
+    border-radius:2px;
+    text-decoration:none;
+    font-weight:700;
+    border:1px solid;
+    transition:opacity .15s;
+  }
+  .photo-link:hover { opacity:.75; }
+  .photo-link.zillow  { background:#006aff14; color:#006aff; border-color:#006aff55; }
+  .photo-link.redfin  { background:#d6212114; color:#d62121; border-color:#d6212155; }
+  .photo-link.trulia  { background:#5a0f8614; color:#5a0f86; border-color:#5a0f8655; }
+  .photo-link.source  { background:#f4f6fa;   color:#4b5a72; border-color:#d0d8e8;   }
+
+  .legend { background:#fffbeb; border:1px solid #fde68a; border-left:3px solid #d4a017;
+             padding:14px 18px; margin:20px 0; display:flex; flex-wrap:wrap;
+             gap:14px; align-items:center; }
+  .legend-title { font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+                   letter-spacing:.1em; color:#92650a; }
+  .legend-item { font-family:'Inter',sans-serif; font-size:11px; color:#44403c; }
+
+  .tips { background:#eff6ff; border:1px solid #bfdbfe; border-top:3px solid #1d4ed8;
+           padding:18px 20px; margin:20px 0; }
+  .tips h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+              color:#1d4ed8; margin-bottom:10px; }
+  .tips ul { list-style:none; }
+  .tips ul li { padding:3px 0 3px 16px; position:relative; font-size:12px; color:#1e3a5f; }
+  .tips ul li::before { content:"→"; position:absolute; left:0; color:#1d4ed8; }
+
+  .quick-ref { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
+  .ref-box { background:var(--surface); border:1px solid var(--border); padding:14px 16px; }
+  .ref-box h4 { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:8px; }
+  .ref-box h4.gold { color:#92650a; }
+  .ref-box h4.blue { color:#1d4ed8; }
+  .ref-box p { font-size:12px; color:#374151; margin:2px 0; }
+  .ref-box a { color:#1d4ed8; text-decoration:none; }
+
+  .footer { margin-top:32px; padding-top:16px; border-top:1px solid var(--border);
+             font-family:'Space Mono',monospace; font-size:9px; color:#94a3b8;
+             line-height:1.8; text-transform:uppercase; letter-spacing:.05em; }
+
+  /* ── MOBILE RESPONSIVE ─────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    body { padding:16px 12px; font-size:13px; }
+
+    /* Header stacks vertically */
+    .header { flex-direction:column; gap:10px; }
+    h1 { font-size:26px; }
+
+    /* Stats: 2-column grid */
+    .stats-strip { grid-template-columns:repeat(2,1fr); }
+    .stats-strip .stat:last-child { grid-column:1/-1; }
+
+    /* Section header wraps */
+    .section-hdr { flex-wrap:wrap; gap:8px; }
+    .section-line { display:none; }
+
+    /* Hide desktop table, show mobile cards instead */
+    .deal-table { display:none; }
+    .mobile-cards { display:block !important; }
+
+    /* Quick ref stacks */
+    .quick-ref { grid-template-columns:1fr; }
+
+    /* Legend wraps */
+    .legend { flex-direction:column; gap:6px; }
+  }
+
+  /* Mobile deal cards — hidden on desktop, shown on mobile */
+  .mobile-cards { display:none; margin-bottom:24px; }
+  .deal-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:4px solid #92650a;
+    border-radius:4px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .deal-card.butler { border-left-color:#1d4ed8; }
+  .deal-card-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .deal-card-id {
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:#92650a;
+    font-weight:700;
+  }
+  .deal-card.butler .deal-card-id { color:#1d4ed8; }
+  .deal-card-score {
+    font-family:'Syne',sans-serif;
+    font-size:20px;
+    font-weight:800;
+    color:#15803d;
+  }
+  .deal-card-score.gold { color:#92650a; }
+  .deal-card-address {
+    font-weight:600;
+    font-size:14px;
+    color:#0f172a;
+    margin-bottom:2px;
+  }
+  .deal-card-location {
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .deal-card-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin:10px 0;
+  }
+  .deal-card-field { }
+  .deal-card-label {
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .deal-card-value {
+    font-family:'Syne',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:#0f172a;
+  }
+  .deal-card-value.gold   { color:#92650a; }
+  .deal-card-value.orange { color:#f97316; }
+  .deal-card-value.green  { color:#16a34a; }
+  .deal-card-value.red    { color:#dc2626; }
+  .deal-card-value.blue   { color:#1d4ed8; }
+  .deal-card-breakdown {
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    color:#4b5a72;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:8px 10px;
+    margin-top:8px;
+    line-height:1.8;
+  }
+  .deal-card-tags { margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="eyebrow">Western PA Real Estate · Investor Intelligence</div>
+    <h1>Investor List</h1>
+    <div class="sub">Allegheny County &amp; Butler County, PA · April 19, 2026</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="date">Generated: 2026-04-19 19:28</div>
+    <div class="live-badge"><span class="live-dot"></span> Auto-Generated Report</div>
+  </div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat"><div class="stat-num">263</div><div class="stat-label">Allegheny Sheriff Sales</div></div>
+  <div class="stat"><div class="stat-num blue">231</div><div class="stat-label">Butler Sales Active</div></div>
+  <div class="stat"><div class="stat-num green">15–25%</div><div class="stat-label">Tax Lien ROI Range</div></div>
+  <div class="stat"><div class="stat-num">13</div><div class="stat-label">Deals This Report</div></div>
+  <div class="stat"><div class="stat-num green">$360,314</div><div class="stat-label">Total Est. Profit Pool</div></div>
+</div>
+
+<!-- ALLEGHENY -->
+<div class="section-hdr">
+  <span class="county-pill pill-a">Allegheny County</span>
+  <div class="section-line"></div>
+  <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);">Next Sale: May 4, 2026 · Virtual</span>
+</div>
+<table class="deal-table">
+  <thead><tr>
+    <th>#</th><th>Property</th><th>Bid / Ask</th><th>Est. Market Value</th>
+    <th>Est. Rehab Cost</th><th>Net Profit (6% Sales)</th>
+    <th>Strategy</th><th>Est. Rent</th><th>Deal Score</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">01</td>
+      <td class="address-cell">
+        <strong>605 Scene Ridge Road</strong>
+        <span>McKeesport, PA 15133 · Liberty Borough · Parcel 556-G-276</span>
+        <div style="margin-top:4px;"><span class="tag tag-hothot">🔥 Hot</span><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/605-Scene-Ridge-Rd-McKeesport-PA-15133_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/McKeesport/605-Scene-Ridge-Rd-15133/home/74676479" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/mckeesport/605-scene-ridge-rd-mckeesport-pa-15133--2196175540" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$18,000</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$95,000</div>
+        <div class="est-value">Liberty Borough</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$50,000</div>
+        <div class="rehab-note">Kitchen/bath update <br> cosmetic + systems</div>
+      </td>
+      <td>
+        <div class="profit-pos">$21,300</div>
+        <div class="profit-breakdown">ARV $95,000 − Acq $18,000<br>− Rehab $50,000 − Sales $5,700</div>
+        <div><span class="profit-roi roi-good">ROI 31%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Fix & Flip</span><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$900/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">95</span>
+          <div class="score-track"><div class="score-fill" style="width:95%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">02</td>
+      <td class="address-cell">
+        <strong>74 Pride Road</strong>
+        <span>Pittsburgh (Penn Hills), PA 15235 · Penn Hills · Parcel 231-C-386</span>
+        <div style="margin-top:4px;"><span class="tag tag-hothot">🔥 Hot</span><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/74-Pride-Rd-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/74-Pride-Rd-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/74-pride-rd-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$20,563</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$150,000</div>
+        <div class="est-value">Penn Hills</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$70,000</div>
+        <div class="rehab-note">Full interior rehab <br> roof/HVAC inspection</div>
+      </td>
+      <td>
+        <div class="profit-pos">$50,437</div>
+        <div class="profit-breakdown">ARV $150,000 − Acq $20,563<br>− Rehab $70,000 − Sales $9,000</div>
+        <div><span class="profit-roi roi-hot">ROI 56%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Rental</span><span class="tag tag-strat">Flip</span></td>
+      <td>
+        <div class="rent-estimate">~$1,100/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">92</span>
+          <div class="score-track"><div class="score-fill" style="width:92%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">03</td>
+      <td class="address-cell">
+        <strong>116 5th Avenue (5-Unit Multifamily)</strong>
+        <span>McKeesport, PA 15132 · Allegheny County · Multifamily</span>
+        <div style="margin-top:4px;"><span class="tag tag-multi-family">Multi-Family</span><span class="tag tag-value-add">Value-Add</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/116-5th-Ave-McKeesport-PA-15132_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/McKeesport/116-5th-Ave-15132/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/mckeesport/116-5th-ave-mckeesport-pa-15132/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.land.com/property/0.05-acre-in-allegheny-county-pennsylvania/25763226" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$60,000</div>
+        <div class="est-value">For Sale · Active Listing</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$180,000</div>
+        <div class="est-value">Allegheny County</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$100,000</div>
+        <div class="rehab-note">3 vacant units <br> ~$33K per unit</div>
+      </td>
+      <td>
+        <div class="profit-pos">$9,200</div>
+        <div class="profit-breakdown">ARV $180,000 − Acq $60,000<br>− Rehab $100,000 − Sales $10,800</div>
+        <div><span class="profit-roi roi-low">ROI 6%</span></div>
+      </td>
+      <td><span class="tag tag-strat">5-Unit Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$4,000/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">90</span>
+          <div class="score-track"><div class="score-fill" style="width:90%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">04</td>
+      <td class="address-cell">
+        <strong>8907 Upland Terrace</strong>
+        <span>Pittsburgh (Penn Hills), PA 15235 · Penn Hills · Parcel 231-D-340</span>
+        <div style="margin-top:4px;"><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/8907-Upland-Ter-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/8907-Upland-Ter-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/8907-upland-ter-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$22,488</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$160,000</div>
+        <div class="est-value">Penn Hills</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$80,000</div>
+        <div class="rehab-note">Full rehab <br> kitchen/bath/flooring</div>
+      </td>
+      <td>
+        <div class="profit-pos">$47,912</div>
+        <div class="profit-breakdown">ARV $160,000 − Acq $22,488<br>− Rehab $80,000 − Sales $9,600</div>
+        <div><span class="profit-roi roi-hot">ROI 47%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Fix & Flip</span><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,100/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">88</span>
+          <div class="score-track"><div class="score-fill" style="width:88%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">05</td>
+      <td class="address-cell">
+        <strong>227 Marland Street (30th Ward)</strong>
+        <span>Pittsburgh, PA 15210 · Pittsburgh · Parcel 0033-B-00272</span>
+        <div style="margin-top:4px;"><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/227-Marland-St-Pittsburgh-PA-15210_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/227-Marland-St-15210/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/227-marland-st-pittsburgh-pa-15210/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$45,379</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$130,000</div>
+        <div class="est-value">Pittsburgh</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$60,000</div>
+        <div class="rehab-note">Moderate rehab <br> paint/floors/fixtures</div>
+      </td>
+      <td>
+        <div class="profit-pos">$16,821</div>
+        <div class="profit-breakdown">ARV $130,000 − Acq $45,379<br>− Rehab $60,000 − Sales $7,800</div>
+        <div><span class="profit-roi roi-good">ROI 16%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Rental</span><span class="tag tag-strat">Flip</span></td>
+      <td>
+        <div class="rent-estimate">~$1,050/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">82</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:82%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">06</td>
+      <td class="address-cell">
+        <strong>152 Keefer Drive</strong>
+        <span>Pittsburgh (Penn Hills), PA 15235 · Penn Hills · Parcel 539-D-199</span>
+        <div style="margin-top:4px;"><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/152-Keefer-Dr-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/152-Keefer-Dr-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/152-keefer-dr-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$47,190</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$155,000</div>
+        <div class="est-value">Penn Hills</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$70,000</div>
+        <div class="rehab-note">Full interior rehab + exterior touch-up</div>
+      </td>
+      <td>
+        <div class="profit-pos">$28,510</div>
+        <div class="profit-breakdown">ARV $155,000 − Acq $47,190<br>− Rehab $70,000 − Sales $9,300</div>
+        <div><span class="profit-roi roi-good">ROI 24%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,050/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">80</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:80%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">07</td>
+      <td class="address-cell">
+        <strong>1924 Universal Road</strong>
+        <span>Pittsburgh (Penn Hills), PA 15235 · Penn Hills · Parcel 635-E-97</span>
+        <div style="margin-top:4px;"><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/1924-Universal-Rd-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/1924-Universal-Rd-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/1924-universal-rd-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$39,311</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$150,000</div>
+        <div class="est-value">Penn Hills</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$70,000</div>
+        <div class="rehab-note">Kitchen/bath/systems <br> full interior</div>
+      </td>
+      <td>
+        <div class="profit-pos">$31,689</div>
+        <div class="profit-breakdown">ARV $150,000 − Acq $39,311<br>− Rehab $70,000 − Sales $9,000</div>
+        <div><span class="profit-roi roi-good">ROI 29%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Fix & Flip</span><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,050/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">79</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:79%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">08</td>
+      <td class="address-cell">
+        <strong>8260 Chaske Street</strong>
+        <span>Pittsburgh (Penn Hills), PA 15147 · Penn Hills · Parcel 294-N-185</span>
+        <div style="margin-top:4px;"><span class="tag tag-taxlien">Tax Lien</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/8260-Chaske-St-Pittsburgh-PA-15147_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/8260-Chaske-St-15147/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/8260-chaske-st-pittsburgh-pa-15147/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$49,355</div>
+        <div class="est-value">Tax Lien · May 4, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$155,000</div>
+        <div class="est-value">Penn Hills</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$70,000</div>
+        <div class="rehab-note">Full interior rehab <br> standard scope</div>
+      </td>
+      <td>
+        <div class="profit-pos">$26,345</div>
+        <div class="profit-breakdown">ARV $155,000 − Acq $49,355<br>− Rehab $70,000 − Sales $9,300</div>
+        <div><span class="profit-roi roi-good">ROI 22%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,100/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">77</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:77%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#92650a;">09</td>
+      <td class="address-cell">
+        <strong>129 Campmeeting Road</strong>
+        <span>Clinton (Findlay Twp), PA 15026 · Allegheny · West Allegheny SD</span>
+        <div style="margin-top:4px;"><span class="tag tag-flip">Flip</span><span class="tag tag-rental">Rental</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/homes/129-Campmeeting-Rd-Clinton-PA-15026_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Clinton/129-Campmeeting-Rd-15026/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/clinton/129-campmeeting-rd-clinton-pa-15026/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.homes.com/allegheny-county-pa/auction/" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$349,000</div>
+        <div class="est-value">Auction · Active Auction</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$390,000</div>
+        <div class="est-value">Allegheny</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$30,000</div>
+        <div class="rehab-note">Light cosmetic only <br> well-maintained brick</div>
+      </td>
+      <td>
+        <div class="profit-neg">-$12,400</div>
+        <div class="profit-breakdown">ARV $390,000 − Acq $349,000<br>− Rehab $30,000 − Sales $23,400</div>
+        <div><span class="profit-roi roi-low">Flip Loss — Rental Only</span></div>
+      </td>
+      <td><span class="tag tag-strat">Long-Term Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$2,200/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">75</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:75%"></div></div>
+        </div>
+      </td>
+    </tr></tbody>
+</table>
+<div class="mobile-cards">
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#01 · Allegheny County</div>
+        <div class="deal-card-address">605 Scene Ridge Road</div>
+        <div class="deal-card-location">McKeesport, PA 15133</div>
+      </div>
+      <div class="deal-card-score ">95</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-hothot">🔥 Hot</span><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/605-Scene-Ridge-Rd-McKeesport-PA-15133_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/McKeesport/605-Scene-Ridge-Rd-15133/home/74676479" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/mckeesport/605-scene-ridge-rd-mckeesport-pa-15133--2196175540" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$18,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$95,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$50,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$21,300</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$900/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 31%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $95,000 − Acq $18,000 − Rehab $50,000 − Sales $5,700</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Fix & Flip · Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#02 · Allegheny County</div>
+        <div class="deal-card-address">74 Pride Road</div>
+        <div class="deal-card-location">Pittsburgh (Penn Hills), PA 15235</div>
+      </div>
+      <div class="deal-card-score ">92</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-hothot">🔥 Hot</span><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/74-Pride-Rd-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/74-Pride-Rd-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/74-pride-rd-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$20,563</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$150,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$70,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$50,437</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,100/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 56%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $150,000 − Acq $20,563 − Rehab $70,000 − Sales $9,000</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Rental · Flip
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#03 · Allegheny County</div>
+        <div class="deal-card-address">116 5th Avenue (5-Unit Multifamily)</div>
+        <div class="deal-card-location">McKeesport, PA 15132</div>
+      </div>
+      <div class="deal-card-score ">90</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-multi-family">Multi-Family</span><span class="tag tag-value-add">Value-Add</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/116-5th-Ave-McKeesport-PA-15132_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/McKeesport/116-5th-Ave-15132/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/mckeesport/116-5th-ave-mckeesport-pa-15132/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.land.com/property/0.05-acre-in-allegheny-county-pennsylvania/25763226" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$60,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$180,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$100,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$9,200</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$4,000/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 6%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $180,000 − Acq $60,000 − Rehab $100,000 − Sales $10,800</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Active Listing &nbsp;·&nbsp; 5-Unit Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#04 · Allegheny County</div>
+        <div class="deal-card-address">8907 Upland Terrace</div>
+        <div class="deal-card-location">Pittsburgh (Penn Hills), PA 15235</div>
+      </div>
+      <div class="deal-card-score ">88</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/8907-Upland-Ter-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/8907-Upland-Ter-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/8907-upland-ter-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$22,488</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$160,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$80,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$47,912</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,100/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 47%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $160,000 − Acq $22,488 − Rehab $80,000 − Sales $9,600</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Fix & Flip · Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#05 · Allegheny County</div>
+        <div class="deal-card-address">227 Marland Street (30th Ward)</div>
+        <div class="deal-card-location">Pittsburgh, PA 15210</div>
+      </div>
+      <div class="deal-card-score gold">82</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/227-Marland-St-Pittsburgh-PA-15210_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/227-Marland-St-15210/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/227-marland-st-pittsburgh-pa-15210/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$45,379</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$130,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$60,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$16,821</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,050/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 16%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $130,000 − Acq $45,379 − Rehab $60,000 − Sales $7,800</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Rental · Flip
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#06 · Allegheny County</div>
+        <div class="deal-card-address">152 Keefer Drive</div>
+        <div class="deal-card-location">Pittsburgh (Penn Hills), PA 15235</div>
+      </div>
+      <div class="deal-card-score gold">80</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/152-Keefer-Dr-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/152-Keefer-Dr-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/152-keefer-dr-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$47,190</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$155,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$70,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$28,510</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,050/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 24%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $155,000 − Acq $47,190 − Rehab $70,000 − Sales $9,300</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#07 · Allegheny County</div>
+        <div class="deal-card-address">1924 Universal Road</div>
+        <div class="deal-card-location">Pittsburgh (Penn Hills), PA 15235</div>
+      </div>
+      <div class="deal-card-score gold">79</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/1924-Universal-Rd-Pittsburgh-PA-15235_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/1924-Universal-Rd-15235/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/1924-universal-rd-pittsburgh-pa-15235/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$39,311</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$150,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$70,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$31,689</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,050/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 29%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $150,000 − Acq $39,311 − Rehab $70,000 − Sales $9,000</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Fix & Flip · Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#08 · Allegheny County</div>
+        <div class="deal-card-address">8260 Chaske Street</div>
+        <div class="deal-card-location">Pittsburgh (Penn Hills), PA 15147</div>
+      </div>
+      <div class="deal-card-score gold">77</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-taxlien">Tax Lien</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/8260-Chaske-St-Pittsburgh-PA-15147_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Pittsburgh/8260-Chaske-St-15147/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/pittsburgh/8260-chaske-st-pittsburgh-pa-15147/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://sheriffalleghenycounty.com/wp-content/uploads/2026/04/May-Sale-List.pdf" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$49,355</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$155,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$70,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$26,345</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,100/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 22%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $155,000 − Acq $49,355 − Rehab $70,000 − Sales $9,300</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 May 4, 2026 &nbsp;·&nbsp; Rental
+    </div>
+  </div>
+
+  <div class="deal-card ">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#09 · Allegheny County</div>
+        <div class="deal-card-address">129 Campmeeting Road</div>
+        <div class="deal-card-location">Clinton (Findlay Twp), PA 15026</div>
+      </div>
+      <div class="deal-card-score gold">75</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-flip">Flip</span><span class="tag tag-rental">Rental</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/homes/129-Campmeeting-Rd-Clinton-PA-15026_rb/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/PA/Clinton/129-Campmeeting-Rd-15026/home/" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/p/pa/clinton/129-campmeeting-rd-clinton-pa-15026/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.homes.com/allegheny-county-pa/auction/" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$349,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$390,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$30,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value red">-$12,400</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$2,200/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">Flip Loss — Rental Only</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $390,000 − Acq $349,000 − Rehab $30,000 − Sales $23,400</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Active Auction &nbsp;·&nbsp; Long-Term Rental
+    </div>
+  </div></div>
+
+<!-- BUTLER -->
+<div class="section-hdr">
+  <span class="county-pill pill-b">Butler County</span>
+  <div class="section-line"></div>
+  <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);">Online: butler.pa.realforeclose.com · Jul 17, 2026</span>
+</div>
+<table class="deal-table">
+  <thead><tr>
+    <th>#</th><th>Property / Category</th><th>Bid / Ask</th><th>Est. Market Value</th>
+    <th>Est. Rehab Cost</th><th>Net Profit (6% Sales)</th>
+    <th>Strategy</th><th>Est. Rent</th><th>Deal Score</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#1d4ed8;">10</td>
+      <td class="address-cell">
+        <strong>Butler / Cranberry Area — Multiple Properties</strong>
+        <span>Butler, PA 16001 · ZIP 16001 · 21+ active foreclosures</span>
+        <div style="margin-top:4px;"><span class="tag tag-hothottestzip">🔥 Hottest ZIP</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/butler-pa-16001/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/city/2832/PA/Butler/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$140,000</div>
+        <div class="est-value">Online Foreclosure · Apr 11 & Jul 17, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$275,000</div>
+        <div class="est-value">ZIP 16001</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$60,000</div>
+        <div class="rehab-note">Moderate rehab est. <br> varies by property</div>
+      </td>
+      <td>
+        <div class="profit-pos">$58,500</div>
+        <div class="profit-breakdown">ARV $275,000 − Acq $140,000<br>− Rehab $60,000 − Sales $16,500</div>
+        <div><span class="profit-roi roi-good">ROI 29%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Flip</span><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,670/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">89</span>
+          <div class="score-track"><div class="score-fill" style="width:89%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#1d4ed8;">11</td>
+      <td class="address-cell">
+        <strong>Jul 17 Online Sale — Multiple Properties</strong>
+        <span>Butler County, PA · butler.pa.realforeclose.com</span>
+        <div style="margin-top:4px;"><span class="tag tag-foreclosure">Foreclosure</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$100,000</div>
+        <div class="est-value">Online Foreclosure · Jul 17, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$215,000</div>
+        <div class="est-value">butler.pa.realforeclose.com</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$50,000</div>
+        <div class="rehab-note">Cosmetic to moderate interior rehab</div>
+      </td>
+      <td>
+        <div class="profit-pos">$52,100</div>
+        <div class="profit-breakdown">ARV $215,000 − Acq $100,000<br>− Rehab $50,000 − Sales $12,900</div>
+        <div><span class="profit-roi roi-good">ROI 35%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Long-Term Rental</span></td>
+      <td>
+        <div class="rent-estimate">~$1,390/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">78</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:78%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#1d4ed8;">12</td>
+      <td class="address-cell">
+        <strong>Jul 17 Online Sale — Entry-Level Properties</strong>
+        <span>Butler County, PA · butler.pa.realforeclose.com</span>
+        <div style="margin-top:4px;"><span class="tag tag-foreclosure">Foreclosure</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">$60,000</div>
+        <div class="est-value">Online Foreclosure · Jul 17, 2026</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">$125,000</div>
+        <div class="est-value">butler.pa.realforeclose.com</div>
+      </td>
+      <td>
+        <div class="rehab-cost">$40,000</div>
+        <div class="rehab-note">Light to moderate cosmetic work</div>
+      </td>
+      <td>
+        <div class="profit-pos">$17,500</div>
+        <div class="profit-breakdown">ARV $125,000 − Acq $60,000<br>− Rehab $40,000 − Sales $7,500</div>
+        <div><span class="profit-roi roi-good">ROI 18%</span></div>
+      </td>
+      <td><span class="tag tag-strat">Rental</span><span class="tag tag-strat">Light Flip</span></td>
+      <td>
+        <div class="rent-estimate">~$960/mo</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-good">72</span>
+          <div class="score-track"><div class="score-fill  gold" style="width:72%"></div></div>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:#1d4ed8;">13</td>
+      <td class="address-cell">
+        <strong>Preforeclosures — 197+ Available</strong>
+        <span>Butler County, PA — Various · Off-market · Contact owners directly</span>
+        <div style="margin-top:4px;"><span class="tag tag-off-marketedge">Off-Market Edge</span></div>
+        <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.foreclosure.com/listings/butler-county-pa/preforeclosure_sheriff%20sale/" target="_blank" class="photo-link source">Source</a></div>
+      </td>
+      <td>
+        <div class="price">TBD</div>
+        <div class="est-value">Preforeclosure · Ongoing</div>
+      </td>
+      <td>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;">TBD</div>
+        <div class="est-value">Off-market</div>
+      </td>
+      <td>
+        <div class="rehab-cost">TBD</div>
+        <div class="rehab-note">Inspect before offer <br> Budget 10–20% ARV</div>
+      </td>
+      <td>
+        <div class="profit-tbd">TBD</div>
+        <div class="profit-breakdown">Profit = ARV − Purchase − Rehab − 6% Sales</div>
+        <div><span class="profit-roi roi-tbd">Depends on deal</span></div>
+      </td>
+      <td><span class="tag tag-strat">Pre-Auction</span><span class="tag tag-strat">Rental</span></td>
+      <td>
+        <div class="rent-estimate">Varies</div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span class="score-num s-hot">85</span>
+          <div class="score-track"><div class="score-fill" style="width:85%"></div></div>
+        </div>
+      </td>
+    </tr></tbody>
+</table>
+<div class="mobile-cards">
+  <div class="deal-card butler">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#10 · Butler County</div>
+        <div class="deal-card-address">Butler / Cranberry Area — Multiple Properties</div>
+        <div class="deal-card-location">Butler, PA 16001</div>
+      </div>
+      <div class="deal-card-score ">89</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-hothottestzip">🔥 Hottest ZIP</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/butler-pa-16001/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/city/2832/PA/Butler/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$140,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$275,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$60,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$58,500</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,670/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 29%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $275,000 − Acq $140,000 − Rehab $60,000 − Sales $16,500</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Apr 11 & Jul 17, 2026 &nbsp;·&nbsp; Flip · Rental
+    </div>
+  </div>
+
+  <div class="deal-card butler">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#11 · Butler County</div>
+        <div class="deal-card-address">Jul 17 Online Sale — Multiple Properties</div>
+        <div class="deal-card-location">Butler County, PA</div>
+      </div>
+      <div class="deal-card-score gold">78</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-foreclosure">Foreclosure</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$100,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$215,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$50,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$52,100</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$1,390/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 35%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $215,000 − Acq $100,000 − Rehab $50,000 − Sales $12,900</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Jul 17, 2026 &nbsp;·&nbsp; Long-Term Rental
+    </div>
+  </div>
+
+  <div class="deal-card butler">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#12 · Butler County</div>
+        <div class="deal-card-address">Jul 17 Online Sale — Entry-Level Properties</div>
+        <div class="deal-card-location">Butler County, PA</div>
+      </div>
+      <div class="deal-card-score gold">72</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-foreclosure">Foreclosure</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://butler.pa.realforeclose.com/" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">$60,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">$125,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">$40,000</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value green">$17,500</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">~$960/mo</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">ROI 18%</div>
+      </div>
+    </div>
+    <div class="deal-card-breakdown">Formula: ARV $125,000 − Acq $60,000 − Rehab $40,000 − Sales $7,500</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Jul 17, 2026 &nbsp;·&nbsp; Rental · Light Flip
+    </div>
+  </div>
+
+  <div class="deal-card butler">
+    <div class="deal-card-header">
+      <div>
+        <div class="deal-card-id">#13 · Butler County</div>
+        <div class="deal-card-address">Preforeclosures — 197+ Available</div>
+        <div class="deal-card-location">Butler County, PA — Various</div>
+      </div>
+      <div class="deal-card-score ">85</div>
+    </div>
+    <div class="deal-card-tags"><span class="tag tag-off-marketedge">Off-Market Edge</span></div>
+    <div class="photo-links"><a href="https://www.zillow.com/butler-county-pa/foreclosures/" target="_blank" class="photo-link zillow">Zillow</a><a href="https://www.redfin.com/county/372/PA/Butler-County/foreclosures" target="_blank" class="photo-link redfin">Redfin</a><a href="https://www.trulia.com/for_sale/Butler_County,PA/FORECLOSURE_lt/" target="_blank" class="photo-link trulia">Trulia</a><a href="https://www.foreclosure.com/listings/butler-county-pa/preforeclosure_sheriff%20sale/" target="_blank" class="photo-link source">Source</a></div>
+    <div class="deal-card-grid">
+      <div class="deal-card-field">
+        <div class="deal-card-label">Bid / Ask</div>
+        <div class="deal-card-value gold">TBD</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Market Value</div>
+        <div class="deal-card-value">TBD</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rehab (2×)</div>
+        <div class="deal-card-value orange">TBD</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Net Profit</div>
+        <div class="deal-card-value blue">TBD</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">Est. Rent</div>
+        <div class="deal-card-value green">Varies</div>
+      </div>
+      <div class="deal-card-field">
+        <div class="deal-card-label">ROI / Status</div>
+        <div class="deal-card-value" style="font-size:12px;">Depends on deal</div>
+      </div>
+    </div>
+    
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      📅 Ongoing &nbsp;·&nbsp; Pre-Auction · Rental
+    </div>
+  </div></div>
+
+<div class="legend">
+  <span class="legend-title">Formula:</span>
+  <span class="legend-item">Net Profit = ARV − Acquisition − Rehab − (ARV × 6%)</span>
+  <span class="legend-item">·</span>
+  <span class="legend-item">ROI = Net Profit ÷ (Acq + Rehab)</span>
+  <span class="legend-item">·</span>
+  <span class="legend-item"><span style="color:#16a34a;">■</span> 85–100 High ROI</span>
+  <span class="legend-item"><span style="color:#92650a;">■</span> 70–84 Solid</span>
+  <span class="legend-item"><span style="color:#475569;">■</span> &lt;70 Watch</span>
+</div>
+
+<div class="tips">
+  <h3>💡 Quick Reminders</h3>
+  <ul>
+    <li>Allegheny: virtual sales only — register at <strong>sheriffalleghenycounty.com</strong> (allow 2 business days)</li>
+    <li>Butler: online mortgage sales at <strong>butler.pa.realforeclose.com</strong> — $2,500 deposit required</li>
+    <li>All properties sold <strong>as-is</strong> — rehab estimates include 2× buffer for unexpected costs</li>
+    <li>Verify sale status the morning of auction — bankruptcy filings can cancel sales with no notice</li>
+    <li>Deal #09 (Campmeeting Rd) is a <strong>rental hold only</strong> — flipping at $349K acquisition produces a loss</li>
+    <li>5,478 tax lien opportunities in Allegheny County — yields of 15–25% possible</li>
+  </ul>
+</div>
+
+<div class="quick-ref">
+  <div class="ref-box">
+    <h4 class="gold">Allegheny County</h4>
+    <p>Next Sale: <strong>May 4, 2026</strong> (Virtual) · July 6, 2026</p>
+    <p>Register: <a href="https://sheriffalleghenycounty.com">sheriffalleghenycounty.com</a></p>
+    <p>Sale List: <a href="https://sheriffalleghenycounty.com/sheriffs-sales/">View PDF</a></p>
+    <p>Phone: 412-350-4739</p>
+  </div>
+  <div class="ref-box">
+    <h4 class="blue">Butler County</h4>
+    <p>Online Sales: <strong>Apr 11 &amp; Jul 17, 2026</strong></p>
+    <p>Bid: <a href="https://butler.pa.realforeclose.com">butler.pa.realforeclose.com</a></p>
+    <p>Listings: <a href="https://civil.co.butler.pa.us/sheriff.salelisting/">civil.co.butler.pa.us</a></p>
+    <p>Deposit: $2,500 · Sheriff: Michael T. Slupe</p>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by run_investor_report.py on 2026-04-19 at 19:28 ·
+  Profit formula: ARV − Acquisition − Rehab − (ARV × 6%) · Rehab = 2× conservative estimate ·
+  All figures are estimates for due diligence purposes only and do not constitute financial or legal advice ·
+  Verify all details with respective county sheriff offices before bidding ·
+  Sources: Allegheny County Sheriff, Butler County Sheriff, foreclosure.com, sheriffsales.net, redfin.com
+</div>
+
+</body>
+</html>
