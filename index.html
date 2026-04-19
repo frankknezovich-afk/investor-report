@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Investor List — Allegheny & Butler County</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+/* Run as early as possible — before CSS even loads */
+document.addEventListener('DOMContentLoaded', function() {
+  function fmtNow() {
+    var d=new Date(), D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    M=['January','February','March','April','May','June','July','August','September','October','November','December'],
+    h=d.getHours(), m=('0'+d.getMinutes()).slice(-2), s=('0'+d.getSeconds()).slice(-2),
+    ap=h>=12?'PM':'AM';
+    h=h%12||12;
+    return D[d.getDay()]+', '+M[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' · '+h+':'+m+':'+s+' '+ap;
+  }
+  function stamp(){['live-ts','footer-ts','hdr-date'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=fmtNow();});}
+  stamp();
+  setInterval(stamp,1000);
+});
+</script>
 <style>
   :root {
     --bg:#f4f6fa; --surface:#fff; --surface2:#eef1f7; --border:#d0d8e8;
@@ -1393,29 +1409,41 @@
 </div>
 
 <script>
-(function() {
-  function fmtNow() {
-    var d = new Date();
-    var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
-    var day  = days[d.getDay()];
-    var mon  = months[d.getMonth()];
-    var date = d.getDate();
-    var yr   = d.getFullYear();
-    var h    = d.getHours();
-    var m    = ('0' + d.getMinutes()).slice(-2);
-    var ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12 || 12;
-    return day + ', ' + mon + ' ' + date + ', ' + yr + ' at ' + h + ':' + m + ' ' + ampm;
-  }
+function fmtNow() {
+  var d = new Date();
+  var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+  var h  = d.getHours();
+  var m  = ('0' + d.getMinutes()).slice(-2);
+  var s  = ('0' + d.getSeconds()).slice(-2);
+  var ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return days[d.getDay()] + ', '
+    + months[d.getMonth()] + ' '
+    + d.getDate() + ', '
+    + d.getFullYear()
+    + ' · ' + h + ':' + m + ':' + s + ' ' + ap;
+}
+
+function stampAll() {
   var ts = fmtNow();
-  var els = ['live-ts', 'footer-ts', 'hdr-date'];
-  els.forEach(function(id) {
+  ['live-ts','footer-ts','hdr-date'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.textContent = ts;
   });
-})();
+}
+
+/* Run immediately AND after DOM is ready — covers all mobile browsers */
+stampAll();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', stampAll);
+} else {
+  stampAll();
+}
+
+/* Tick every second so the time stays live while the page is open */
+setInterval(stampAll, 1000);
 </script>
 
 </body>
